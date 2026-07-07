@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FutureMe AI — Path Matrix & Trajectory Engine</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #030014;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, h4, .font-display {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        /* Ambient Background Orbs */
+        .orb {
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.15;
+            z-index: 0;
+            pointer-events: none;
+        }
+        .orb-purple { top: -10%; right: -5%; background: #7c3aed; }
+        .orb-blue { bottom: 10%; left: -10%; background: #06b6d4; }
+        .orb-pink { top: 40%; left: 30%; background: #db2777; }
+
+        /* Premium Glass Card */
+        .premium-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Interactive Neo-Input */
+        .neo-input {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .neo-input:focus {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: #a855f7;
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.15), inset 0 0 10px rgba(168, 85, 247, 0.05);
+            outline: none;
+        }
+
+        /* Animated Grid background line details */
+        .bg-grid {
+            background-size: 40px 40px;
+            background-image: linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+        }
+
+        /* Shimmer Effect Button */
+        .shimmer-btn {
+            position: relative;
+            overflow: hidden;
+        }
+        .shimmer-btn::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.13), transparent);
+            transform: rotate(45deg);
+            transition: 0.5s;
+        }
+        .shimmer-btn:hover::after {
+            left: 120%;
+        }
+    </style>
+</head>
+<body class="text-slate-200 flex flex-col justify-between antialiased bg-grid">
+
+    <div class="orb orb-purple"></div>
+    <div class="orb orb-blue"></div>
+    <div class="orb orb-pink"></div>
+
+    <header class="w-full max-w-7xl mx-auto px-6 py-6 flex justify-between items-center relative z-10">
+        <div class="flex items-center space-x-3 cursor-pointer group">
+            <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-violet-600 via-purple-600 to-fuchsia-600 flex items-center justify-center shadow-xl shadow-purple-500/20 group-hover:rotate-12 transition-transform duration-300">
+                <i class="fa-solid fa-wand-magic-sparkles text-white text-lg"></i>
+            </div>
+            <div>
+                <span class="text-xl font-bold tracking-tight bg-gradient-to-r from-white via-slate-200 to-purple-300 bg-clip-text text-transparent block">FutureMe</span>
+                <span class="text-[10px] tracking-widest text-slate-500 block uppercase -mt-1 font-semibold">Quantum Core</span>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <span class="hidden sm:inline-flex items-center gap-1.5 text-xs text-slate-400 font-medium">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Nodes Operational
+            </span>
+            <div class="text-xs tracking-wider text-purple-400 font-mono bg-purple-950/30 px-3.5 py-2 rounded-xl border border-purple-900/40 shadow-inner">
+                ENGINE_V1.0.26
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow flex items-center justify-center px-4 sm:px-6 py-6 relative z-10">
+        <div class="w-full max-w-5xl mx-auto">
+            
+            <div id="formSection" class="premium-card rounded-3xl p-6 sm:p-10 shadow-2xl border-t-purple-500/20 animate__animated animate__fadeIn">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10 border-b border-white/5 pb-8">
+                    <div class="max-w-xl">
+                        <span class="text-xs font-bold uppercase tracking-widest text-purple-400 block mb-2 font-display">Predictive Neural Modeler</span>
+                        <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">
+                            Calculate Your Future Trajectory
+                        </h1>
+                        <p class="text-slate-400 text-sm mt-2 leading-relaxed">
+                            Provide your career base-coordinates. Our artificial layer will simulate market conditions, map trajectory speeds, and extract risk-adjusted paths.
+                        </p>
+                    </div>
+                    <div class="flex items-center gap-2 bg-white/[0.02] border border-white/5 p-3 rounded-2xl self-start md:self-auto">
+                        <i class="fa-solid fa-shield-halved text-purple-400 text-lg p-2 bg-purple-950/40 rounded-xl"></i>
+                        <div class="text-left pr-4">
+                            <p class="text-[11px] uppercase tracking-wider text-slate-500 font-bold">Privacy Layer</p>
+                            <p class="text-xs text-slate-300 font-medium">Data is encrypted & stateless</p>
+                        </div>
+                    </div>
+                </div>
+
+                <form id="futureForm" class="space-y-8">
+                    <div class="bg-white/[0.01] border border-white/5 rounded-2xl p-5 space-y-5">
+                        <h2 class="text-xs font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2 font-display">
+                            <i class="fa-solid fa-id-card text-purple-400/80"></i> 01. Identity Coordinates
+                        </h2>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                            <div class="flex flex-col space-y-2">
+                                <label class="text-xs font-semibold text-slate-400">Full Signature</label>
+                                <input type="text" name="name" required placeholder="Alex Mercer" 
+                                    class="neo-input px-4 py-3.5 rounded-xl text-slate-200 placeholder-slate-600 text-sm">
+                            </div>
+                            <div class="flex flex-col space-y-2">
+                                <label class="text-xs font-semibold text-slate-400">Current Biological Age</label>
+                                <input type="number" name="age" required min="1" max="120" placeholder="21" 
+                                    class="neo-input px-4 py-3.5 rounded-xl text-slate-200 placeholder-slate-600 text-sm">
+                            </div>
+                            <div class="flex flex-col space-y-2 md:col-span-1">
+                                <label class="text-xs font-semibold text-slate-400">Education Matrix / Current Role</label>
+                                <input type="text" name="education" required placeholder="B.Tech CS / Frontend Intern" 
+                                    class="neo-input px-4 py-3.5 rounded-xl text-slate-200 placeholder-slate-600 text-sm">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white/[0.01] border border-white/5 rounded-2xl p-5 space-y-5">
+                        <h2 class="text-xs font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2 font-display">
+                            <i class="fa-solid fa-bullseye text-fuchsia-400/80"></i> 02. Ambition Vector Fields
+                        </h2>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div class="flex flex-col space-y-2 group">
+                                <label class="text-xs font-semibold text-purple-400 flex items-center gap-1.5 transition-colors group-focus-within:text-purple-300">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-purple-500 shadow-lg shadow-purple-500/50"></span>Short-Term Gate (1-2 Yrs)
+                                </label>
+                                <textarea name="short_term" required rows="4" placeholder="Master Next.js and land a Full-Time Software Engineering role at a high-growth startup." 
+                                    class="neo-input p-4 rounded-xl text-slate-200 placeholder-slate-600 text-sm resize-none leading-relaxed"></textarea>
+                            </div>
+                            <div class="flex flex-col space-y-2 group">
+                                <label class="text-xs font-semibold text-fuchsia-400 flex items-center gap-1.5 transition-colors group-focus-within:text-fuchsia-300">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-fuchsia-500 shadow-lg shadow-fuchsia-500/50"></span>Long-Term Horizon (5 Yrs)
+                                </label>
+                                <textarea name="long_term" required rows="4" placeholder="Transition into a Solutions Architect or Tech Lead position, contributing to open source AI systems." 
+                                    class="neo-input p-4 rounded-xl text-slate-200 placeholder-slate-600 text-sm resize-none leading-relaxed"></textarea>
+                            </div>
+                            <div class="flex flex-col space-y-2 group">
+                                <label class="text-xs font-semibold text-pink-400 flex items-center gap-1.5 transition-colors group-focus-within:text-pink-300">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-pink-500 shadow-lg shadow-pink-500/50"></span>Ultimate Apex Vision (10+ Yrs)
+                                </label>
+                                <textarea name="future_goal" required rows="4" placeholder="Found an automation startup leveraging agentic workflows to solve real-world productivity blocks." 
+                                    class="neo-input p-4 rounded-xl text-slate-200 placeholder-slate-600 text-sm resize-none leading-relaxed"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-2">
+                        <button type="submit" 
+                            class="shimmer-btn w-full py-4 rounded-2xl font-bold tracking-wide bg-gradient-to-r from-indigo-600 via-purple-600 to-fuchsia-600 hover:from-indigo-500 hover:to-fuchsia-500 text-white shadow-2xl shadow-purple-900/30 transform hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 flex items-center justify-center gap-2 text-sm uppercase">
+                            <span>Synthesize Architecture Pipeline</span>
+                            <i class="fa-solid fa-bolt-lightning text-xs animate-bounce"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="loadingSection" class="hidden premium-card rounded-3xl p-16 text-center shadow-2xl max-w-xl mx-auto border-purple-500/10 animate__animated animate__fadeIn">
+                <div class="relative w-28 h-28 mx-auto mb-8 flex items-center justify-center">
+                    <div class="absolute inset-0 rounded-full border-4 border-purple-500/5 border-t-purple-500 animate-spin [animation-duration:1.5s]"></div>
+                    <div class="absolute inset-2 rounded-full border-4 border-fuchsia-500/5 border-b-fuchsia-500 animate-spin [animation-direction:reverse] [animation-duration:1s]"></div>
+                    <div class="absolute inset-4 rounded-full border border-cyan-500/10 border-r-cyan-400 animate-spin [animation-duration:2s]"></div>
+                    <i class="fa-solid fa-brain text-3xl text-transparent bg-clip-text bg-gradient-to-br from-purple-400 to-fuchsia-400"></i>
+                </div>
+                <h3 id="loadingTitle" class="text-2xl font-bold mb-3 text-white tracking-tight">Accessing Neural Core...</h3>
+                <p id="loadingDesc" class="text-slate-400 text-sm max-w-xs mx-auto leading-relaxed font-mono text-[11px] text-purple-300/60">
+                    [LOAD: Parsing target parameters]
+                </p>
+            </div>
+
+            <div id="resultSection" class="hidden space-y-6 animate__animated animate__fadeIn">
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="premium-card rounded-2xl p-6 md:col-span-1 flex items-center gap-4 relative overflow-hidden group">
+                        <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-purple-500/5 rounded-full group-hover:scale-12 transition-transform duration-500"></div>
+                        <div class="w-12 h-12 rounded-xl bg-purple-950/50 border border-purple-500/20 flex items-center justify-center text-purple-400 shrink-0">
+                            <i class="fa-solid fa-user-gear text-lg"></i>
+                        </div>
+                        <div>
+                            <span class="text-[10px] font-bold uppercase tracking-widest text-purple-400 block font-display">Target Identity</span>
+                            <h2 id="resName" class="text-2xl font-bold text-white tracking-tight mt-0.5">--</h2>
+                            <p id="resAgeMeta" class="text-slate-400 text-xs mt-0.5 font-medium">--</p>
+                        </div>
+                    </div>
+                    
+                    <div class="premium-card rounded-2xl p-6 md:col-span-2 flex flex-col justify-between relative overflow-hidden">
+                        <div class="flex justify-between items-start mb-3">
+                            <div>
+                                <span class="text-[10px] font-bold uppercase tracking-widest text-fuchsia-400 block font-display">Trajectory Feasibility Rate</span>
+                                <p class="text-xs text-slate-400 mt-0.5">Algorithmic probability index for execution alignment</p>
+                            </div>
+                            <span id="resSuccessLabel" class="text-3xl font-black font-display text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-fuchsia-400 to-pink-400">0%</span>
+                        </div>
+                        <div class="w-full h-3.5 bg-slate-950 rounded-full overflow-hidden p-0.5 border border-white/5 shadow-inner">
+                            <div id="resProgressBar" class="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-fuchsia-500 rounded-full transition-all duration-1000 ease-out" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="premium-card rounded-2xl p-6 sm:p-8 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 px-4 py-1.5 bg-purple-500/10 rounded-bl-xl border-l border-b border-purple-500/10 text-[10px] font-mono tracking-widest text-purple-400 uppercase font-semibold">
+                        Generated Report
+                    </div>
+                    <div class="flex items-center space-x-3 mb-5 border-b border-white/5 pb-4">
+                        <div class="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-400 border border-indigo-500/20">
+                            <i class="fa-solid fa-terminal text-xs"></i>
+                        </div>
+                        <h3 class="text-lg font-bold tracking-tight text-white font-display">AI Trajectory Projection Summary</h3>
+                    </div>
+                    <p id="resPredictionText" class="text-slate-300 text-sm leading-relaxed whitespace-pre-line font-medium bg-white/[0.01] p-5 rounded-xl border border-white/[0.02]">--</p>
+                </div>
+
+                <div class="premium-card rounded-2xl p-6 sm:p-8">
+                    <h3 class="text-lg font-bold tracking-tight text-white mb-6 flex items-center gap-2.5 font-display">
+                        <i class="fa-solid fa-timeline text-purple-400 text-base"></i> Strategic Milestone Benchmarks
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
+                        
+                        <div class="bg-gradient-to-b from-white/[0.02] to-transparent border border-white/5 p-5 rounded-xl flex flex-col justify-between relative group hover:border-purple-500/20 transition-colors duration-300">
+                            <div>
+                                <div class="flex justify-between items-center mb-3">
+                                    <span class="text-[10px] font-black text-purple-400 tracking-widest uppercase font-mono px-2 py-0.5 bg-purple-950/50 rounded border border-purple-900/30">Phase 01</span>
+                                    <span class="text-xs text-slate-500 font-bold">1 Year</span>
+                                </div>
+                                <h4 class="text-sm font-bold text-slate-200 mb-2 font-display">Foundation Matrix Build</h4>
+                                <div class="w-full h-[1px] bg-gradient-to-r from-purple-500/30 to-transparent mb-3"></div>
+                            </div>
+                            <p id="resTimeline1" class="text-slate-400 text-xs leading-relaxed">--</p>
+                        </div>
+
+                        <div class="bg-gradient-to-b from-white/[0.02] to-transparent border border-white/5 p-5 rounded-xl flex flex-col justify-between relative group hover:border-fuchsia-500/20 transition-colors duration-300">
+                            <div>
+                                <div class="flex justify-between items-center mb-3">
+                                    <span class="text-[10px] font-black text-fuchsia-400 tracking-widest uppercase font-mono px-2 py-0.5 bg-fuchsia-950/50 rounded border border-fuchsia-900/30">Phase 02</span>
+                                    <span class="text-xs text-slate-500 font-bold">5 Years</span>
+                                </div>
+                                <h4 class="text-sm font-bold text-slate-200 mb-2 font-display">Acceleration Scaling</h4>
+                                <div class="w-full h-[1px] bg-gradient-to-r from-fuchsia-500/30 to-transparent mb-3"></div>
+                            </div>
+                            <p id="resTimeline5" class="text-slate-400 text-xs leading-relaxed">--</p>
+                        </div>
+
+                        <div class="bg-gradient-to-b from-white/[0.02] to-transparent border border-white/5 p-5 rounded-xl flex flex-col justify-between relative group hover:border-pink-500/20 transition-colors duration-300">
+                            <div>
+                                <div class="flex justify-between items-center mb-3">
+                                    <span class="text-[10px] font-black text-pink-400 tracking-widest uppercase font-mono px-2 py-0.5 bg-pink-950/50 rounded border border-pink-900/30">Phase 03</span>
+                                    <span class="text-xs text-slate-500 font-bold">10+ Years</span>
+                                </div>
+                                <h4 class="text-sm font-bold text-slate-200 mb-2 font-display">Apex Market Maturation</h4>
+                                <div class="w-full h-[1px] bg-gradient-to-r from-pink-500/30 to-transparent mb-3"></div>
+                            </div>
+                            <p id="resTimeline10" class="text-slate-400 text-xs leading-relaxed">--</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end">
+                    <button id="resetBtn" class="px-5 py-3 rounded-xl text-xs font-bold border border-white/10 hover:border-white/20 bg-white/[0.02] hover:bg-white/[0.05] text-slate-300 hover:text-white transition duration-150 flex items-center gap-2 uppercase tracking-wider font-mono">
+                        <i class="fa-solid fa-rotate-left"></i>
+                        <span>Re-simulate Coordinate System</span>
+                    </button>
+                </div>
+
+            </div>
+
+        </div>
+    </main>
+
+    <footer class="w-full text-center py-6 text-[11px] tracking-wider text-slate-600 font-mono relative z-10">
+        &copy; 2026 FutureMe Engine &bull; Neural Trajectory Cluster Layer &bull; All Rights Reserved.
+    </footer>
+
+    <script>
+        document.getElementById('futureForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const formSection = document.getElementById('formSection');
+            const loadingSection = document.getElementById('loadingSection');
+            const resultSection = document.getElementById('resultSection');
+            
+            const loadingTitle = document.getElementById('loadingTitle');
+            const loadingDesc = document.getElementById('loadingDesc');
+
+            // 1. Move UI to loading state
+            formSection.classList.add('hidden');
+            loadingSection.classList.remove('hidden');
+
+            // Dynamic text loading updates to enhance premium UX feel
+            const stages = [
+                { title: "Parsing Coordinates...", desc: "[STAGE_01]: Mapping trajectory vectors..." },
+                { title: "Analyzing Risk Factors...", desc: "[STAGE_02]: Resolving macro-market dependencies..." },
+                { title: "Rendering Path Matrix...", desc: "[STAGE_03]: Formulating cross-year milestones..." }
+            ];
+            
+            let stageIdx = 0;
+            const stageInterval = setInterval(() => {
+                if(stageIdx < stages.length) {
+                    loadingTitle.innerText = stages[stageIdx].title;
+                    loadingDesc.innerText = stages[stageIdx].desc;
+                    stageIdx++;
+                }
+            }, 900);
+
+            // Collect form payloads
+            const formData = new FormData(this);
+            const payload = {
+                name: formData.get('name'),
+                age: formData.get('age'),
+                education: formData.get('education'),
+                short_term: formData.get('short_term'),
+                long_term: formData.get('long_term'),
+                future_goal: formData.get('future_goal')
+            };
+
+            try {
+                // 2. Dispatch payload to backend pipeline
+                const response = await fetch('/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                clearInterval(stageInterval);
+
+                if (!response.ok) throw new Error('Network payload generation rejected.');
+                const data = await response.json();
+
+                // 3. Inject data arrays straight into DOM components
+                document.getElementById('resName').innerText = data.name;
+                document.getElementById('resAgeMeta').innerText = `Age ${data.age} • ${data.education}`;
+                document.getElementById('resPredictionText').innerText = data.prediction;
+                document.getElementById('resTimeline1').innerText = data.timeline_1y;
+                document.getElementById('resTimeline5').innerText = data.timeline_5y;
+                document.getElementById('resTimeline10').innerText = data.timeline_10y;
+                
+                // Success label setting
+                document.getElementById('resSuccessLabel').innerText = `${data.success_rate}%`;
+
+                // 4. Reveal Results Card Frame
+                loadingSection.classList.add('hidden');
+                resultSection.classList.remove('hidden');
+
+                // 5. Trigger Progress Bar Transition after DOM node is unhidden
+                setTimeout(() => {
+                    document.getElementById('resProgressBar').style.width = `${data.success_rate}%`;
+                }, 150);
+
+            } catch (error) {
+                clearInterval(stageInterval);
+                alert('An error occurred during trajectory assembly. Please try again.');
+                console.error(error);
+                
+                // Return to form state safely
+                loadingSection.classList.add('hidden');
+                formSection.classList.remove('hidden');
+            }
+        });
+
+        // Reset execution cleanly back to form input view
+        document.getElementById('resetBtn').addEventListener('click', function() {
+            document.getElementById('resultSection').classList.add('hidden');
+            document.getElementById('formSection').classList.remove('hidden');
+            document.getElementById('resProgressBar').style.width = `0%`;
+            document.getElementById('futureForm').reset();
+            
+            // Reset loader states
+            document.getElementById('loadingTitle').innerText = "Accessing Neural Core...";
+            document.getElementById('loadingDesc').innerText = "[LOAD: Parsing target parameters]";
+        });
+    </script>
+</body>
+</html>
