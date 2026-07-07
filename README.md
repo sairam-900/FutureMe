@@ -45,13 +45,7 @@ FutureMe/
 │
 ├── templates/
 │   └── index.html
-│
-├── static/
-│   ├── style.css
-│   └── script.js
-```
 
----
 
 ## ⚙️ Installation
 
